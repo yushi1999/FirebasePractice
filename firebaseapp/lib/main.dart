@@ -1,27 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   // 最初に表示するWidget
   runApp(ChatApp());
 }
 
+//更新可能なデータ
+class UserState extends ChangeNotifier {
+  FirebaseUser user;
+  void setUser(FirebaseUser newUser) {
+    user = newUser;
+    notifyListeners();
+  }
+}
+
 class ChatApp extends StatelessWidget {
+  //ユーザーの情報を管理するデータ
+  final UserState userState = UserState();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      // 右上に表示される"debug"ラベルを消す
-      debugShowCheckedModeBanner: false,
-      // アプリ名
-      title: 'ChatApp',
-      theme: ThemeData(
-        // テーマカラー
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    //ユーザー情報を渡す
+    return ChangeNotifierProvider<UserState>.value(
+      value: userState,
+      child: MaterialApp(
+        // 右上に表示される"debug"ラベルを消す
+        debugShowCheckedModeBanner: false,
+        // アプリ名
+        title: 'ChatApp',
+        theme: ThemeData(
+          // テーマカラー
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        // ログイン画面を表示
+        home: LoginPage(),
       ),
-      // ログイン画面を表示
-      home: LoginPage(),
     );
   }
 }
@@ -40,6 +57,8 @@ class _LoginPageState extends State<LoginPage> {
   String password = '';
   @override
   Widget build(BuildContext context) {
+    //ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
     return Scaffold(
       body: Center(
         child: Container(
@@ -88,6 +107,9 @@ class _LoginPageState extends State<LoginPage> {
                         password: password,
                       );
                       final FirebaseUser user = result.user;
+                      //ユーザー情報を更新
+                      userState.setUser(user);
+
                       // ユーザー登録に成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(
@@ -121,6 +143,9 @@ class _LoginPageState extends State<LoginPage> {
                           password: password,
                         );
                         final FirebaseUser user = result.user;
+                        // ユーザー情報を更新
+                        userState.setUser(user);
+
                         // ログインに成功した場合
                         // チャット画面に遷移＋ログイン画面を破棄
                         await Navigator.of(context).pushReplacement(
@@ -153,6 +178,10 @@ class ChatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
+    final FirebaseUser user = userState.user;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("チャット"),
@@ -261,6 +290,10 @@ class _AddPostPageState extends State<AddPostPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
+    final FirebaseUser user = userState.user;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('チャット投稿'),
@@ -293,7 +326,7 @@ class _AddPostPageState extends State<AddPostPage> {
                   onPressed: () async {
                     final date =
                         DateTime.now().toLocal().toIso8601String(); //現在の日時
-                    final email = widget.user.email; //AddPostPageのデータを参照
+                    final email = user.email; //AddPostPageのデータを参照
                     //投稿メッセージ用ドキュメント作成
                     await Firestore.instance
                         .collection('posts') // コレクションID指定
