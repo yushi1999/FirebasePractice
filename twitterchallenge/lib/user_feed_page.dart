@@ -28,8 +28,11 @@ class _UserFeedPageState extends State<UserFeedPage> {
             return Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  //余白を付ける際に使う
+                  padding: const EdgeInsets.all(4.0), //上下左右全方向に4.0ポイント
                   child: Row(
+                    //余白を付ける対象がchild。Rowは縦方向に並んだレイアウト
+                    //CrossAxisはレイアウトの並びに対して直角方向(今は縦方向)
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Padding(
@@ -38,14 +41,16 @@ class _UserFeedPageState extends State<UserFeedPage> {
                             size: 60.0, color: Colors.grey),
                       ),
                       Expanded(
+                          //RowやColumnの子Widget間の隙間を目一杯埋める
                           child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.start, //メイン方向の開始位置に配置
                               children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(top: 4.0),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment
+                                    .spaceBetween, //子たちの間に均等にスペースを置く
                                 children: <Widget>[
                                   Expanded(
                                     child: Container(
